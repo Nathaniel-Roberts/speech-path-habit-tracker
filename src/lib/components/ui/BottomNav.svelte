@@ -24,6 +24,11 @@
 			icon: 'clinic'
 		},
 		{
+			href: '/stats',
+			label: 'Stats',
+			icon: 'stats'
+		},
+		{
 			href: '/shop',
 			label: 'Shop',
 			icon: 'shop'
@@ -60,6 +65,12 @@
 						<polygon points="2,10 12,3 22,10" fill="none" />
 						<rect x="9" y="14" width="6" height="7" />
 						<line x1="12" y1="7" x2="12" y2="7" stroke-linecap="round" />
+					</svg>
+				{:else if item.icon === 'stats'}
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<path d="M18 20V10" stroke-linecap="round" stroke-linejoin="round" />
+						<path d="M12 20V4" stroke-linecap="round" stroke-linejoin="round" />
+						<path d="M6 20v-6" stroke-linecap="round" stroke-linejoin="round" />
 					</svg>
 				{:else if item.icon === 'shop'}
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

@@ -1,4 +1,4 @@
-import { Application, Graphics, Text, TextStyle, Container } from 'pixi.js';
+import { Application, Graphics, Text, TextStyle, Container, Sprite, Assets } from 'pixi.js';
 import type { Upgrade } from '$lib/game/types';
 
 /** Color palette for different upgrade categories */
@@ -10,11 +10,15 @@ const CATEGORY_COLORS: Record<Upgrade['category'], number> = {
 	expansion: 0xb9936c // terracotta
 };
 
-/** Cream/beige background color */
+/** Cream/beige background color (fallback) */
 const BACKGROUND_COLOR = 0xfaf5eb;
 
 /** Border/frame color */
 const FRAME_COLOR = 0x8b7355;
+
+/** Base dimensions the positions in config are designed for */
+const BASE_WIDTH = 280;
+const BASE_HEIGHT = 187; // 3:2 aspect ratio
 
 /**
  * ClinicRenderer wraps a PixiJS Application to render
@@ -23,6 +27,7 @@ const FRAME_COLOR = 0x8b7355;
 export class ClinicRenderer {
 	private app: Application | null = null;
 	private upgradeContainer: Container | null = null;
+	private backgroundSprite: Sprite | null = null;
 
 	/**
 	 * Initialize the PixiJS application on a canvas element.
@@ -41,35 +46,78 @@ export class ClinicRenderer {
 			autoDensity: true
 		});
 
+		// Load and draw background
+		await this.loadBackground();
+
 		// Create container for upgrade sprites
 		this.upgradeContainer = new Container();
 		this.app.stage.addChild(this.upgradeContainer);
-
-		// Draw initial background
-		this.drawBackground();
 	}
 
 	/**
-	 * Draw a simple cream/beige background with a cottagecore frame.
+	 * Load the background image from static/sprites.
 	 */
-	drawBackground(): void {
+	async loadBackground(): Promise<void> {
+		if (!this.app) return;
+
+		try {
+			// Load the background texture
+			const texture = await Assets.load('/sprites/clinic_background.png');
+
+			this.backgroundSprite = new Sprite(texture);
+
+			// Scale to fit the canvas
+			this.scaleBackground();
+
+			// Add as first child (behind everything else)
+			this.app.stage.addChildAt(this.backgroundSprite, 0);
+		} catch (error) {
+			console.warn('Could not load background image, using fallback:', error);
+			this.drawFallbackBackground();
+		}
+	}
+
+	/**
+	 * Scale the background sprite to cover the canvas.
+	 */
+	private scaleBackground(): void {
+		if (!this.app || !this.backgroundSprite) return;
+
+		const { width, height } = this.app.screen;
+		const texture = this.backgroundSprite.texture;
+
+		// Scale to cover (like CSS background-size: cover)
+		const scaleX = width / texture.width;
+		const scaleY = height / texture.height;
+		const scale = Math.max(scaleX, scaleY);
+
+		this.backgroundSprite.scale.set(scale);
+
+		// Center the background
+		this.backgroundSprite.x = (width - texture.width * scale) / 2;
+		this.backgroundSprite.y = (height - texture.height * scale) / 2;
+	}
+
+	/**
+	 * Draw a fallback background if image fails to load.
+	 */
+	private drawFallbackBackground(): void {
 		if (!this.app) return;
 
 		const { width, height } = this.app.screen;
 
-		// Background is already set via backgroundColor, but we can add decoration
 		const bg = new Graphics();
 
-		// Draw a subtle inner border/frame
-		const frameWidth = 8;
+		// Main background
 		bg.rect(0, 0, width, height);
 		bg.fill({ color: BACKGROUND_COLOR });
 
 		// Draw decorative frame border
+		const frameWidth = 8;
 		bg.rect(frameWidth, frameWidth, width - frameWidth * 2, height - frameWidth * 2);
 		bg.stroke({ color: FRAME_COLOR, width: 3, alpha: 0.5 });
 
-		// Add corner decorations (simple dots for a rustic feel)
+		// Add corner decorations
 		const cornerOffset = frameWidth + 10;
 		const cornerSize = 6;
 
@@ -83,7 +131,6 @@ export class ClinicRenderer {
 			bg.fill({ color: FRAME_COLOR, alpha: 0.4 });
 		});
 
-		// Insert background at the bottom of the stage
 		this.app.stage.addChildAt(bg, 0);
 	}
 
@@ -104,9 +151,9 @@ export class ClinicRenderer {
 		const boxWidth = 60;
 		const boxHeight = 40;
 
-		// Main rectangle
+		// Main rectangle with slight transparency
 		placeholder.roundRect(0, 0, boxWidth, boxHeight, 6);
-		placeholder.fill({ color, alpha: 0.85 });
+		placeholder.fill({ color, alpha: 0.9 });
 
 		// Border
 		placeholder.roundRect(0, 0, boxWidth, boxHeight, 6);
@@ -142,7 +189,7 @@ export class ClinicRenderer {
 	 * Render all purchased upgrades that have position data.
 	 * Clears any existing upgrade renders first.
 	 */
-	renderUpgrades(purchasedKeys: string[], allUpgrades: Upgrade[]): void {
+	async renderUpgrades(purchasedKeys: string[], allUpgrades: Upgrade[]): Promise<void> {
 		if (!this.app || !this.upgradeContainer) return;
 
 		// Clear existing upgrade graphics
@@ -150,6 +197,10 @@ export class ClinicRenderer {
 
 		// Create a map for quick lookup
 		const upgradeMap = new Map(allUpgrades.map((u) => [u.key, u]));
+
+		// Calculate scale based on canvas size
+		const scaleX = this.app.screen.width / BASE_WIDTH;
+		const scaleY = this.app.screen.height / BASE_HEIGHT;
 
 		// Render each purchased upgrade that has position data
 		for (const key of purchasedKeys) {
@@ -160,27 +211,48 @@ export class ClinicRenderer {
 				continue;
 			}
 
-			// Scale positions based on canvas size
-			// Config positions assume a base canvas of ~280x175
-			const baseWidth = 280;
-			const baseHeight = 175;
-			const scaleX = this.app.screen.width / baseWidth;
-			const scaleY = this.app.screen.height / baseHeight;
-
 			const scaledX = upgrade.position.x * scaleX;
 			const scaledY = upgrade.position.y * scaleY;
 
-			// For now, always draw placeholders since we don't have real sprites
-			// In the future, this could check if sprite exists and load it
-			const placeholder = this.drawPlaceholder(
-				upgrade.key,
-				upgrade.name,
-				scaledX,
-				scaledY,
-				upgrade.category
-			);
+			// Try to load actual sprite, fall back to placeholder
+			const spriteContainer = await this.loadUpgradeSprite(upgrade, scaledX, scaledY, scaleX, scaleY);
+			this.upgradeContainer.addChild(spriteContainer);
+		}
+	}
 
-			this.upgradeContainer.addChild(placeholder);
+	/**
+	 * Load an upgrade sprite or fall back to placeholder.
+	 */
+	private async loadUpgradeSprite(
+		upgrade: Upgrade,
+		x: number,
+		y: number,
+		scaleX: number,
+		scaleY: number
+	): Promise<Container> {
+		if (!upgrade.sprite) {
+			return this.drawPlaceholder(upgrade.key, upgrade.name, x, y, upgrade.category);
+		}
+
+		try {
+			const texture = await Assets.load(`/sprites/${upgrade.sprite}`);
+			const sprite = new Sprite(texture);
+
+			const container = new Container();
+			container.x = x;
+			container.y = y;
+
+			// Scale sprite to fit nicely (target ~60px wide at base scale)
+			const targetWidth = 60 * ((scaleX + scaleY) / 2);
+			const spriteScale = targetWidth / texture.width;
+			sprite.scale.set(spriteScale);
+
+			container.addChild(sprite);
+			return container;
+		} catch (error) {
+			// Sprite not found, use placeholder
+			console.log(`Sprite not found for ${upgrade.key}, using placeholder`);
+			return this.drawPlaceholder(upgrade.key, upgrade.name, x, y, upgrade.category);
 		}
 	}
 
@@ -201,6 +273,9 @@ export class ClinicRenderer {
 	resize(width: number, height: number): void {
 		if (!this.app) return;
 		this.app.renderer.resize(width, height);
+
+		// Re-scale background
+		this.scaleBackground();
 	}
 
 	/**
@@ -211,6 +286,7 @@ export class ClinicRenderer {
 			this.app.destroy(true, { children: true, texture: true });
 			this.app = null;
 			this.upgradeContainer = null;
+			this.backgroundSprite = null;
 		}
 	}
 }

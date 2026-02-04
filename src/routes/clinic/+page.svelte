@@ -13,9 +13,9 @@
 	let containerWidth = $state(0);
 	let containerRef: HTMLDivElement | undefined = $state();
 
-	// Compute canvas dimensions maintaining 16:10 aspect ratio
+	// Compute canvas dimensions maintaining 3:2 aspect ratio (matches background image)
 	let canvasDimensions = $derived.by(() => {
-		const aspectRatio = 16 / 10;
+		const aspectRatio = 3 / 2; // 1536x1024 image ratio
 		const maxHeight = typeof window !== 'undefined' ? window.innerHeight * 0.6 : 400;
 		const width = containerWidth || 800;
 		let height = width / aspectRatio;
@@ -86,6 +86,7 @@
 	$effect(() => {
 		if (renderer && canvasDimensions.width > 0 && canvasDimensions.height > 0) {
 			renderer.resize(canvasDimensions.width, canvasDimensions.height);
+			// renderUpgrades is now async
 			renderer.renderUpgrades(data.purchasedUpgrades, data.upgrades);
 		}
 	});
