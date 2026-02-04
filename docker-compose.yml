@@ -1,0 +1,23 @@
+services:
+  clinic:
+    build: .
+    container_name: speech-path-clinic
+    ports:
+      - "3000:3000"
+    volumes:
+      - clinic_data:/data
+    environment:
+      - NODE_ENV=production
+      - ORIGIN=${ORIGIN:-http://localhost:3000}
+      - CONFIG_DIR=/app/config
+      - DATA_DIR=/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  clinic_data:
+    driver: local

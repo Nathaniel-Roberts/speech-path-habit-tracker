@@ -1,0 +1,8 @@
+{
+  "milestones": [
+    { "days": 7, "coins": 20, "message": "One week streak!" },
+    { "days": 14, "coins": 50, "message": "Two weeks strong!" },
+    { "days": 30, "coins": 150, "message": "One month! You're amazing!" },
+    { "days": 100, "coins": 500, "message": "100 days! Legendary!" }
+  ]
+}

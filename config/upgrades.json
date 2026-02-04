@@ -1,0 +1,30 @@
+{
+  "upgrades": [
+    { "key": "celf5", "category": "assessment", "name": "CELF-5", "description": "Clinical Evaluation of Language Fundamentals", "cost": 50, "effects": { "clientCapacity": 1 }, "sprite": "celf5.png", "position": { "x": 100, "y": 40 } },
+    { "key": "ppvt4", "category": "assessment", "name": "PPVT-4", "description": "Peabody Picture Vocabulary Test", "cost": 40, "effects": { "clientCapacity": 1 }, "sprite": "ppvt4.png", "position": { "x": 120, "y": 40 } },
+    { "key": "gfta3", "category": "assessment", "name": "GFTA-3", "description": "Goldman-Fristoe Test of Articulation", "cost": 45, "effects": { "clientCapacity": 1 }, "sprite": "gfta3.png", "position": { "x": 140, "y": 40 } },
+    { "key": "ctopp2", "category": "assessment", "name": "CTOPP-2", "description": "Comprehensive Test of Phonological Processing", "cost": 55, "effects": { "clientCapacity": 1 }, "sprite": "ctopp2.png", "position": { "x": 160, "y": 40 } },
+    { "key": "casl2", "category": "assessment", "name": "CASL-2", "description": "Comprehensive Assessment of Spoken Language", "cost": 60, "effects": { "clientCapacity": 1 }, "sprite": "casl2.png", "position": { "x": 180, "y": 40 } },
+
+    { "key": "flashcards", "category": "tool", "name": "Flashcard Set", "description": "Colourful articulation flashcards", "cost": 20, "effects": { "satisfactionPercent": 5 }, "sprite": "flashcards.png", "position": { "x": 60, "y": 80 } },
+    { "key": "artic_mirror", "category": "tool", "name": "Articulation Mirror", "description": "For visual feedback during therapy", "cost": 30, "effects": { "satisfactionPercent": 5 }, "sprite": "mirror.png", "position": { "x": 200, "y": 60 } },
+    { "key": "aac_device", "category": "tool", "name": "AAC Device", "description": "Augmentative and alternative communication tablet", "cost": 80, "effects": { "satisfactionPercent": 10 }, "sprite": "aac.png", "position": { "x": 80, "y": 100 } },
+    { "key": "sensory_kit", "category": "tool", "name": "Sensory Kit", "description": "Fidgets and sensory tools for regulation", "cost": 35, "effects": { "satisfactionPercent": 5 }, "sprite": "sensory.png", "position": { "x": 180, "y": 120 } },
+    { "key": "language_games", "category": "tool", "name": "Language Games Box", "description": "Fun therapy games for all ages", "cost": 45, "effects": { "satisfactionPercent": 7 }, "sprite": "games.png", "position": { "x": 100, "y": 120 } },
+
+    { "key": "potted_plant", "category": "decor", "name": "Potted Plant", "description": "A lovely little succulent", "cost": 10, "effects": { "satisfactionPercent": 1 }, "sprite": "plant1.png", "position": { "x": 20, "y": 30 } },
+    { "key": "cozy_rug", "category": "decor", "name": "Cozy Rug", "description": "Soft and warm underfoot", "cost": 25, "effects": { "satisfactionPercent": 2 }, "sprite": "rug.png", "position": { "x": 100, "y": 140 } },
+    { "key": "bookshelf", "category": "decor", "name": "Bookshelf", "description": "Filled with reference books and picture books", "cost": 40, "effects": { "satisfactionPercent": 3 }, "sprite": "bookshelf.png", "position": { "x": 220, "y": 40 } },
+    { "key": "fairy_lights", "category": "decor", "name": "Fairy Lights", "description": "Warm twinkling lights", "cost": 15, "effects": { "satisfactionPercent": 1 }, "sprite": "lights.png", "position": { "x": 0, "y": 10 } },
+    { "key": "wall_art", "category": "decor", "name": "Wall Art", "description": "Cheerful prints for the walls", "cost": 20, "effects": { "satisfactionPercent": 2 }, "sprite": "art.png", "position": { "x": 140, "y": 10 } },
+    { "key": "plant_shelf", "category": "decor", "name": "Plant Shelf", "description": "A shelf full of trailing plants", "cost": 30, "effects": { "satisfactionPercent": 2 }, "sprite": "plantshelf.png", "position": { "x": 240, "y": 60 } },
+    { "key": "cozy_lamp", "category": "decor", "name": "Cozy Lamp", "description": "Warm ambient lighting", "cost": 18, "effects": { "satisfactionPercent": 1 }, "sprite": "lamp.png", "position": { "x": 40, "y": 90 } },
+    { "key": "clinic_cat", "category": "decor", "name": "Clinic Cat", "description": "A sleepy ginger cat who lives at the clinic", "cost": 100, "effects": { "satisfactionPercent": 5 }, "sprite": "cat.png", "position": { "x": 160, "y": 130 } },
+
+    { "key": "receptionist", "category": "staff", "name": "Receptionist", "description": "Handles bookings so you can focus on therapy", "cost": 200, "effects": { "incomeMultiplier": 0.25 }, "sprite": "receptionist.png", "position": { "x": 30, "y": 120 } },
+    { "key": "therapy_assistant", "category": "staff", "name": "Therapy Assistant", "description": "Helps run group sessions", "cost": 500, "effects": { "incomeMultiplier": 0.5 }, "sprite": "assistant.png", "position": { "x": 200, "y": 100 } },
+
+    { "key": "waiting_room", "category": "expansion", "name": "Waiting Room", "description": "A comfortable space for families to wait", "cost": 300, "effects": { "clientCapacity": 3 }, "sprite": null, "position": null },
+    { "key": "second_room", "category": "expansion", "name": "Second Therapy Room", "description": "Double your therapy space!", "cost": 800, "effects": { "clientCapacity": 5 }, "sprite": null, "position": null }
+  ]
+}

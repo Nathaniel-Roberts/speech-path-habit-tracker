@@ -1,0 +1,12 @@
+{
+  "idleSettings": {
+    "baseClientsPerHour": 1,
+    "maxIdleHours": 12,
+    "baseCoinsPerClient": 1
+  },
+  "habitSettings": {
+    "maxCoinReward": 5,
+    "defaultRecurrence": "daily"
+  },
+  "startingCoins": 10
+}
