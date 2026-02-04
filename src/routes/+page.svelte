@@ -1,14 +1,25 @@
 <script lang="ts">
-	import type { LayoutData } from './$types';
+	import { enhance } from '$app/forms';
+	import type { PageData, ActionData } from './$types';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { getContext } from 'svelte';
 
 	interface Props {
-		data: LayoutData;
+		data: PageData;
+		form: ActionData;
 	}
 
-	let { data }: Props = $props();
+	let { data, form }: Props = $props();
+
+	let toast = $state<{ message: string; type: 'success' | 'error' } | null>(null);
+	let completingId = $state<string | null>(null);
+
+	function showToast(message: string, type: 'success' | 'error') {
+		toast = { message, type };
+		setTimeout(() => {
+			toast = null;
+		}, 3000);
+	}
 
 	function getGreeting(): string {
 		const hour = new Date().getHours();
@@ -129,21 +140,43 @@
 									+{habit.coinReward}
 								</span>
 							</div>
-							{#if habit.streak > 0}
-								<span class="streak-mini">
-									<span aria-hidden="true">*</span>
-									{habit.streak} day{habit.streak !== 1 ? 's' : ''}
-								</span>
-							{/if}
+							<div class="habit-actions">
+								{#if habit.streak > 0}
+									<span class="streak-mini">
+										{habit.streak}
+									</span>
+								{/if}
+								<form
+									method="POST"
+									action="?/complete"
+									use:enhance={() => {
+										completingId = habit.id;
+										return async ({ result, update }) => {
+											completingId = null;
+											if (result.type === 'success' && result.data) {
+												showToast(`+${result.data.coinsAwarded} coins!`, 'success');
+											}
+											await update();
+										};
+									}}
+								>
+									<input type="hidden" name="habitId" value={habit.id} />
+									<button
+										type="submit"
+										class="quick-complete-btn"
+										disabled={completingId === habit.id}
+									>
+										{completingId === habit.id ? '...' : '✓'}
+									</button>
+								</form>
+							</div>
 						</div>
 					</Card>
 				{/each}
 			</div>
 
 			<div class="habits-cta">
-				<a href="/habits">
-					<Button variant="primary">Complete Your Habits</Button>
-				</a>
+				<a href="/habits" class="manage-link">Manage habits →</a>
 			</div>
 		</section>
 	{:else if data.save.habits.length > 0}
@@ -220,6 +253,12 @@
 			"Every small step forward is a step toward finding your voice."
 		</p>
 	</footer>
+
+	{#if toast}
+		<div class="toast toast-{toast.type}" role="alert">
+			<span>{toast.message}</span>
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -359,6 +398,12 @@
 		height: 100%;
 	}
 
+	.habit-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
 	.streak-mini {
 		font-size: 0.75rem;
 		color: var(--color-terracotta-500);
@@ -368,13 +413,53 @@
 		font-weight: 600;
 	}
 
+	.streak-mini::before {
+		content: '🔥';
+		margin-right: 0.125rem;
+	}
+
+	.quick-complete-btn {
+		width: 2rem;
+		height: 2rem;
+		border-radius: 50%;
+		border: 2px solid var(--color-sage-400);
+		background-color: var(--color-cream-50);
+		color: var(--color-sage-500);
+		font-weight: bold;
+		font-size: 1rem;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.quick-complete-btn:hover {
+		background-color: var(--color-sage-500);
+		color: white;
+		transform: scale(1.1);
+	}
+
+	.quick-complete-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+		transform: none;
+	}
+
 	.habits-cta {
 		margin-top: 1rem;
 		text-align: center;
 	}
 
-	.habits-cta a {
+	.manage-link {
+		color: var(--color-sage-500);
 		text-decoration: none;
+		font-weight: 600;
+		font-size: 0.875rem;
+	}
+
+	.manage-link:hover {
+		text-decoration: underline;
 	}
 
 	.all-done-card {
@@ -476,5 +561,39 @@
 		font-style: italic;
 		color: var(--color-bark-300);
 		margin: 0;
+	}
+
+	.toast {
+		position: fixed;
+		bottom: 5rem;
+		left: 50%;
+		transform: translateX(-50%);
+		padding: 0.75rem 1.25rem;
+		border-radius: var(--radius-cottage);
+		font-weight: 600;
+		box-shadow: var(--shadow-cottage-lg);
+		animation: toast-pop 0.3s ease;
+		z-index: 100;
+	}
+
+	.toast-success {
+		background-color: var(--color-sage-500);
+		color: white;
+	}
+
+	.toast-error {
+		background-color: var(--color-rose-400);
+		color: white;
+	}
+
+	@keyframes toast-pop {
+		0% {
+			opacity: 0;
+			transform: translateX(-50%) scale(0.9);
+		}
+		100% {
+			opacity: 1;
+			transform: translateX(-50%) scale(1);
+		}
 	}
 </style>

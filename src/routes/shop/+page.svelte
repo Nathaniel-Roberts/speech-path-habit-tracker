@@ -118,6 +118,7 @@
 					{upgrade}
 					owned={isOwned(upgrade.key)}
 					canAfford={canAfford(upgrade.cost)}
+					{coins}
 					onPurchase={handlePurchase}
 				/>
 				<form

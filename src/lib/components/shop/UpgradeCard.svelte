@@ -5,10 +5,15 @@
 		upgrade: Upgrade;
 		owned: boolean;
 		canAfford: boolean;
+		coins: number;
 		onPurchase: (upgradeKey: string) => void;
 	}
 
-	let { upgrade, owned, canAfford, onPurchase }: Props = $props();
+	let { upgrade, owned, canAfford, coins, onPurchase }: Props = $props();
+
+	// "Almost there" if you have at least 50% of the cost
+	const almostThere = $derived(!owned && !canAfford && coins >= upgrade.cost * 0.5);
+	const coinsNeeded = $derived(upgrade.cost - coins);
 
 	const categoryLabels: Record<Upgrade['category'], string> = {
 		assessment: 'Assessment',
@@ -54,6 +59,8 @@
 		</span>
 		{#if owned}
 			<span class="owned-badge">Owned</span>
+		{:else if almostThere}
+			<span class="almost-badge">Almost there!</span>
 		{/if}
 	</div>
 
@@ -75,11 +82,14 @@
 
 		<button
 			class="purchase-btn"
+			class:almost={almostThere}
 			disabled={owned || !canAfford}
 			onclick={handlePurchase}
 		>
 			{#if owned}
 				Owned
+			{:else if almostThere}
+				Need {coinsNeeded} more
 			{:else if !canAfford}
 				Not enough coins
 			{:else}
@@ -139,6 +149,21 @@
 		border-radius: 9999px;
 		background-color: var(--color-sage-400);
 		color: white;
+	}
+
+	.almost-badge {
+		font-size: 0.75rem;
+		font-weight: 600;
+		padding: 0.25rem 0.625rem;
+		border-radius: 9999px;
+		background-color: var(--color-terracotta-300);
+		color: var(--color-terracotta-500);
+		animation: pulse 2s ease-in-out infinite;
+	}
+
+	@keyframes pulse {
+		0%, 100% { opacity: 1; }
+		50% { opacity: 0.7; }
 	}
 
 	.card-body {
@@ -224,5 +249,10 @@
 		background-color: var(--color-cream-300);
 		color: var(--color-bark-300);
 		cursor: not-allowed;
+	}
+
+	.purchase-btn.almost:disabled {
+		background-color: var(--color-terracotta-200);
+		color: var(--color-terracotta-500);
 	}
 </style>
